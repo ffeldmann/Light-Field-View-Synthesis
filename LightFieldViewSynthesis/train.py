@@ -3,11 +3,14 @@ import torch.nn.functional
 import torch.optim as optim
 import wandb
 from edflow import TemplateIterator
-#from edflow.data.util import adjust_support
+from edflow.util import retrieve
 
+from LightFieldViewSynthesis.utils.LossConstrained import LossConstrained
 from LightFieldViewSynthesis.utils.perceptual_loss.models import PerceptualLoss
 from LightFieldViewSynthesis.utils.tensor_utils import sure_to_numpy, sure_to_torch
-from LightFieldViewSynthesis.utils.LossConstrained import LossConstrained
+
+
+# from edflow.data.util import adjust_support
 
 
 class Iterator(TemplateIterator):
@@ -19,7 +22,8 @@ class Iterator(TemplateIterator):
 
         if self.cuda:
             self.model.cuda()
-        if self.config.get("wandb"):
+
+        if retrieve(self.config, "integrations/wandb/active", default=False):
             wandb.watch(self.model)
 
         # initalize perceptual loss if necessary
