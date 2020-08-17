@@ -1,0 +1,10 @@
+name: LightFieldViewSynthesis
+channels:
+  - conda-forge
+  - pytorch
+  - defaults
+dependencies:
+  - opencv
+  - scikit-image
+  - pytorch
+  - torchvision

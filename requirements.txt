@@ -1,0 +1,10 @@
+opencv
+scikit-image
+pytorch
+torchvision
+pytest
+tensorboard
+imgaug
+albumenations
+wandb
+scikit-learn

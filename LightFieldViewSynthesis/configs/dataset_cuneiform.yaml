@@ -1,0 +1,2 @@
+dataset: LightFieldViewSynthesis.data.Cuneiform_Train
+validation_dataset: LightFieldViewSynthesis.data.Cuneiform_Validation

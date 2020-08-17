@@ -1,0 +1,52 @@
+iterator: AnimalPose.train.Iterator
+model: AnimalPose.models.AutoEncoder
+batch_size: 16 # 32 on quattro
+num_steps: 1000001
+lr: 0.0001
+cuda: True  # False -> use GPU
+ckpt_freq: 10000
+#Training methods
+# Encoder pretrained by torchvision
+pretrained: False
+load_self_pretrained_encoder:
+  active: False
+  path: "load_weights/PosNet18.ckpt"
+load_self_pretrained_decoder:
+  active: False
+  path: "load_weights/PosNet18.ckpt"
+resnet_type: 18 #18, 50, 101,152
+encoder_latent_dim: 256 # decoder latent dim is automatically set by encoder_latent_dim * (2 if encoder_2 else 1)
+encoder_2: False
+
+# True sets the encoder_1 variational
+variational:
+  active: True
+  kl_weight: 0.000001
+
+# Losses
+losses:
+  L2: False
+  KL: False
+  perceptual: True
+  perceptual_network: "vgg" # alex, squeeze or vgg
+  perceptual_weight: 5.0
+  #VGGL1Loss
+  vgg: False
+  vgg_l1_alpha: 1.0
+  vgg_alpha: 1.0
+
+LossConstrained:
+  active: True
+  no_kl_for: 0
+  eps: 0.3 # eps ist der maximal zulässige reconstruction loss
+  mu: 1 # mu ist hyperparameter wie stark der loss angepasst wird
+  lambda_init: 10
+
+# logging
+integrations:
+  git:
+    active: False
+  wandb:
+    active: True
+  tensorboard:
+    active: True
