@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import torch.nn
 import torchvision
-from AnimalPose.utils.tensor_utils import sure_to_torch
+from LightFieldViewSynthesis.utils.tensor_utils import sure_to_torch
 
 
 class MSELossInstances(torch.nn.MSELoss):

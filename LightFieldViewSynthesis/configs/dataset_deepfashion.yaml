@@ -1,0 +1,7 @@
+datasets:
+  train: LightFieldViewSynthesis.data.DeepfashionTrain
+  validation: LightFieldViewSynthesis.data.DeepfashionVal
+augmentation: False
+random_state: 42
+n_classes: 3 # output channels of deconv head (better naming needed)
+regression: False

@@ -3,7 +3,7 @@ import copy
 import torch
 import torch.nn as nn
 
-from LightFieldViewSynthesis.models import ResPoseNet
+from LightFieldViewSynthesis.models.keypoint_predictors import ResPoseNet
 
 
 class Flatten(nn.Module):
@@ -61,7 +61,7 @@ class AutoEncoder(ResPoseNet):
             ))
             if config["encoder_2"]:
                 self.backbone2 = copy.deepcopy(self.backbone)
-            if config["pose_half"]:
+            if config.get("pose_half", False):
                 self.backbone.layer4.add_module("fc", nn.Sequential(
                     Flatten(),
                     nn.Linear(512 * 4 * 4, int(config["encoder_latent_dim"] / 2))
@@ -73,7 +73,7 @@ class AutoEncoder(ResPoseNet):
             ))
             if config["encoder_2"]:
                 self.backbone2 = copy.deepcopy(self.backbone)
-            if config["pose_half"]:
+            if config.get("pose_half", False):
                 self.backbone.layer4.add_module("fc", nn.Sequential(
                     Flatten(),
                     nn.Linear(2048 * 4 * 4, int(config["encoder_latent_dim"] / 2))
@@ -83,22 +83,24 @@ class AutoEncoder(ResPoseNet):
             # for resnet type 18, 38
             self.fc = nn.Linear(
                 config["encoder_latent_dim"] * 2 if config["encoder_2"] else config["encoder_latent_dim"], 512 * 4 * 4)
-            if config["pose_half"]:
+            if config.get("pose_half", False):
                 self.fc = nn.Linear(
                     int(config["encoder_latent_dim"] + config["encoder_latent_dim"] / 2), 512 * 4 * 4)
         else:
             # For resnet type 50, 101, 152
             self.fc = nn.Linear(
                 config["encoder_latent_dim"] * 2 if config["encoder_2"] else config["encoder_latent_dim"], 2048 * 4 * 4)
-            if config["pose_half"]:
+            if config.get("pose_half", False):
                 self.fc = nn.Linear(
                     int(config["encoder_latent_dim"] / 2), 2048 * 4 * 4)
         if self.variational:
             self.fcmu = nn.Linear(config["encoder_latent_dim"], config["encoder_latent_dim"])
             self.fcvar = nn.Linear(config["encoder_latent_dim"], config["encoder_latent_dim"])
-            if config["pose_half"]:
+            if config.get("pose_half", False):
                 self.fcmu = nn.Linear(int(config["encoder_latent_dim"] / 2), int(config["encoder_latent_dim"] / 2))
                 self.fcvar = nn.Linear(int(config["encoder_latent_dim"] / 2), int(config["encoder_latent_dim"] / 2))
+
+        self.tanh = torch.nn.Tanh()
 
     def reparameterize(self, mu, logvar):
         std = torch.exp(0.5 * logvar)
@@ -118,7 +120,8 @@ class AutoEncoder(ResPoseNet):
                 return self.head(x1x2), mu, logvar
             # Reshape x1 for Upsampling
             x1 = self.fc(x1).view(x1.size(0), -1, 4, 4)
-            return self.head(x1), mu, logvar
+            x1 = self.head(x1)
+            return self.tanh(x1), mu, logvar
         else:
             x1 = self.backbone(x1)
             if x2 != None:
@@ -129,4 +132,5 @@ class AutoEncoder(ResPoseNet):
                 return self.head(x1x2)
             # Reshape x1 for Upsampling
             x1 = self.fc(x1).view(x1.size(0), -1, 4, 4)
-            return self.head(x1)
+            x1 = self.head(x1)
+            return self.tanh(x1)

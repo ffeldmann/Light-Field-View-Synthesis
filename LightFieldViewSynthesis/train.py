@@ -10,18 +10,16 @@ from LightFieldViewSynthesis.utils.perceptual_loss.models import PerceptualLoss
 from LightFieldViewSynthesis.utils.tensor_utils import sure_to_numpy, sure_to_torch
 
 
-# from edflow.data.util import adjust_support
-
-
 class Iterator(TemplateIterator):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # loss and optimizer
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.config["lr"])
         self.cuda = True if self.config["cuda"] and torch.cuda.is_available() else False
-
+        self.device = "cpu"
         if self.cuda:
             self.model.cuda()
+            self.device = "cuda"
 
         if retrieve(self.config, "integrations/wandb/active", default=False):
             wandb.watch(self.model)
@@ -50,18 +48,25 @@ class Iterator(TemplateIterator):
 
     def criterion(self, targets, predictions):
         # make sure everything is a torch tensor
-        targets = sure_to_numpy(targets)
-        predictions = sure_to_numpy(predictions)
+        targets = sure_to_torch(targets.transpose(0, 3, 1, 2)).float()
+        if retrieve(self.config, "variational/active", default=False):
+            # Split the predictions tensor in predictions, mu and logvar
+            predictions, mu, logvar = predictions
 
         batch_losses = {}
+        if retrieve(self.config, "variational/active", default=False):
+            # Compute the KL divergence
+            batch_losses["KL"] = 0.5 * torch.sum(torch.exp(logvar) + mu ** 2 - 1. - logvar) * retrieve(self.config,
+                                                                                                       "variational/kl_weight",
+                                                                                                       default=1.0)
+
         if self.config["losses"]["L2"]:
             batch_losses["L2"] = self.mse_loss(targets, predictions.cpu())
 
         if self.config["losses"]["perceptual"]:
             batch_losses["perceptual"] = torch.mean(
-                self.perceptual_loss(torch.from_numpy(targets),
-                                     torch.from_numpy(predictions),
-                                     True)).cpu()
+                self.perceptual_loss(targets, predictions.cpu(), True)).cpu()
+
         batch_losses["total"] = sum(
             [
                 batch_losses[key]
@@ -76,29 +81,42 @@ class Iterator(TemplateIterator):
         model.train(is_train)
 
         # (batch_size, width, height, channel)
-        inputs = sure_to_torch(kwargs["inp"].transpose(0, 3, 1, 2)).to(self.device)
+        inputs = sure_to_torch(kwargs["inp"].transpose(0, 3, 1, 2)).float().to(self.device)
 
         # compute model
         predictions = model(inputs)
         # compute loss
-        losses = self.criterion(kwargs["targets"], predictions.cpu())
+
+        losses = self.criterion(kwargs["targets"], predictions)
+
+        if retrieve(self.config, "variational/active", default=False):
+            # Split the predictions tensor in predictions, mu and logvar
+            predictions, mu, logvar = predictions
 
         def train_op():
             self.optimizer.zero_grad()
-            losses["batch"]["total"].backward()
+            losses["total"].backward()
             self.optimizer.step()
 
         def log_op():
+
             logs = {
                 "images": {
-                    "image_input": sure_to_numpy(inputs).transpose(0, 2, 3, 1),
+                    "inputs": kwargs["inp"],
                     "outputs": sure_to_numpy(predictions).transpose(0, 2, 3, 1),
-                    "targets": kwargs["targets"].transpose(0, 2, 3, 1),
+                    "targets": kwargs["targets"],
                 },
                 "scalars": {
-                    "loss": losses["batch"]["total"],
+                    "loss": losses["total"],
                 },
             }
+
+            if retrieve(self.config, "variational/active", default=False):
+                # Split the predictions tensor in predictions, mu and logvar
+                logs["scalars"]["KL"] = losses["KL"]
+                logs["scalars"]["perceptual"] = losses["perceptual"]
+                logs["scalars"]["mu"] = mu
+                logs["scalars"]["logvar"] = logvar
 
             return logs
 

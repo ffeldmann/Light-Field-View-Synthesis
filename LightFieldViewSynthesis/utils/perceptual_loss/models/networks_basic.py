@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 # import models as util
-import AnimalPose.utils.perceptual_loss.models as util
+import LightFieldViewSynthesis.utils.perceptual_loss.models as util
 import torch
 import torch.nn as nn
 from torch.autograd import Variable

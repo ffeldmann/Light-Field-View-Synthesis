@@ -1,5 +1,5 @@
-iterator: AnimalPose.train.Iterator
-model: AnimalPose.models.AutoEncoder
+iterator: LightFieldViewSynthesis.train.Iterator
+model: LightFieldViewSynthesis.models.AutoEncoder
 batch_size: 16 # 32 on quattro
 num_steps: 1000001
 lr: 0.0001
@@ -21,7 +21,7 @@ encoder_2: False
 # True sets the encoder_1 variational
 variational:
   active: True
-  kl_weight: 0.000001
+  kl_weight: 0.0001
 
 # Losses
 losses:
@@ -36,7 +36,7 @@ losses:
   vgg_alpha: 1.0
 
 LossConstrained:
-  active: True
+  active: False
   no_kl_for: 0
   eps: 0.3 # eps ist der maximal zulässige reconstruction loss
   mu: 1 # mu ist hyperparameter wie stark der loss angepasst wird

@@ -2,7 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import AnimalPose.utils.perceptual_loss.models.dist_model as dist_model
+import LightFieldViewSynthesis.utils.perceptual_loss.models.dist_model as dist_model
 import numpy as np
 import torch
 from skimage.measure import compare_ssim

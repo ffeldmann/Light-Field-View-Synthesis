@@ -4,7 +4,7 @@ import os
 from collections import OrderedDict
 
 # import models as util
-import AnimalPose.utils.perceptual_loss.models as util
+import LightFieldViewSynthesis.utils.perceptual_loss.models as util
 import numpy as np
 import torch
 from scipy.ndimage import zoom

@@ -224,28 +224,6 @@ def hog_similarity(img1, img2=False, PLOT=False):
     return hog_img_inp
 
 
-def plot_pred_figure(images, predictions, labels=None):
-    """
-    Remember to clip output numpy array to [0, 255] range and cast it to uint8.
-    Otherwise matplot.pyplot.imshow would show weird results.
-    Args:
-        images:
-        predictions:
-    Returns:
-    """
-    from AnimalPose.data.animals_VOC2011 import animal_class
-    idx_to_animal = {v: k for k, v in animal_class.items()}
-    fig = plt.figure(figsize=(10, 10))
-    for idx in range(8):
-        fig.add_subplot(4, 2, idx + 1)
-        fig.suptitle('Input, Prediction')
-        if labels != None:
-            plt.title(f"GT:{labels[idx]}, Pred: {predictions[idx]}")
-        else:
-            plt.title(f"{idx_to_animal[predictions[idx]]}")
-        plt.imshow(adjust_support(images[idx].cpu().numpy().transpose(1, 2, 0), "0->1", "0->1"))
-        plt.tight_layout()
-    return fig
 
 
 def plot_input_target_keypoints(inputs: np.ndarray, targets, gt_coords, coords):

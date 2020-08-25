@@ -1,0 +1,8 @@
+datasets:
+  train: LightFieldViewSynthesis.data.Lightfield_Train
+  validation: LightFieldViewSynthesis.data.Lighfield_Validation
+dataroot: "3DCV_Datasets/origami"
+train_size: 0.8
+augmentation: False
+random_state: 42
+n_channels: 3  # rgb or grayscale

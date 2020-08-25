@@ -1,2 +1,2 @@
-from .autoencoder import AutoEncoder
-from .keypoint_predictors import ResnetTorchVisionKeypoints, ResPoseNet
+from LightFieldViewSynthesis.models.keypoint_predictors import ResPoseNet
+from LightFieldViewSynthesis.models.autoencoder import AutoEncoder
