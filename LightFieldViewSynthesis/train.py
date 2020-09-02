@@ -86,8 +86,17 @@ class Iterator(TemplateIterator):
         # compute model
         predictions = model(inputs)
         # compute loss
-
-        losses = self.criterion(kwargs["targets"], predictions)
+        if retrieve(self.config, "LossConstrained/active", default=False):
+            predictions, mu, logvar = predictions
+            loss, log, loss_train_op = self.loss_constrained(inputs,
+                                                             predictions,
+                                                             mu,
+                                                             logvar,
+                                                             self.get_global_step())
+            if is_train:
+                loss_train_op()
+        else:
+            losses = self.criterion(kwargs["targets"], predictions)
 
         if retrieve(self.config, "variational/active", default=False):
             # Split the predictions tensor in predictions, mu and logvar

@@ -36,7 +36,7 @@ losses:
   vgg_alpha: 1.0
 
 LossConstrained:
-  active: False
+  active: True
   no_kl_for: 0
   eps: 0.3 # eps ist der maximal zulässige reconstruction loss
   mu: 1 # mu ist hyperparameter wie stark der loss angepasst wird
