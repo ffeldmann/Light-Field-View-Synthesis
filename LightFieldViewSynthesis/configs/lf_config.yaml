@@ -1,0 +1,25 @@
+dataset: LightFieldViewSynthesis.data.LFDataTrain
+validation_dataset: LightFieldViewSynthesis.data.LFDataTest
+datasets:
+  train: LightFieldViewSynthesis.data.LFDataTrain
+  validation: LightFieldViewSynthesis.data.LFDataTest
+model: LightFieldViewSynthesis.models.lf_autoencoder.LFAutoencoder
+iterator: LightFieldViewSynthesis.trainers.lf_train.Iterator
+
+batch_size: 32
+lr: 1.0e-3
+# input params
+rgb: True
+D: 9
+H: 48
+W: 48
+
+features: [16,24,32,64,96,128,160,192]
+#  L: 16
+#  L0: 24
+#  L1: 2 * L
+#  L2: 4 * L
+#  L3: 6 * L
+#  L4: 8 * L
+#  L5: 10 * L
+#  L6: 12 * L

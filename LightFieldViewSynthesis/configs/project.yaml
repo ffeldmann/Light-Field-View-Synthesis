@@ -1,0 +1,5 @@
+integrations:
+  wandb:
+    active: True
+    entity: tatev
+    project: 3dcv
